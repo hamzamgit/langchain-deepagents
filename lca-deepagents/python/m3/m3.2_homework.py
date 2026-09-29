@@ -38,7 +38,7 @@ from models import model
 
 # This name becomes the skill's directory name. It must exactly match the
 # `name:` field you write in the frontmatter inside build_skill_md() below.
-SKILL_NAME = "your-skill-name"
+SKILL_NAME = "triage-bug-report"
 REFERENCE_PATH = f"/skills/{SKILL_NAME}/reference.md"
 
 
@@ -70,7 +70,40 @@ REFERENCE_PATH = f"/skills/{SKILL_NAME}/reference.md"
 
 def build_skill_md() -> str:
     """TODO 1: return your own SKILL.md content as a string."""
-    raise NotImplementedError("TODO 1: see the comment block above")
+    return """---
+name: triage-bug-report
+description: Use when the user wants to triage, prioritize, or classify a software bug report.
+---
+
+# Triage a Bug Report
+
+Turn a raw bug report into a structured triage decision with severity,
+priority, and next steps.
+
+**Step 1: Restate the bug**: Summarize the reported problem in one or two
+sentences. Note any missing details (repro steps, environment, expected vs
+actual).
+
+**Step 2: Classify impact**: Decide whether the bug blocks core workflows,
+affects a subset of users, or is cosmetic.
+
+**Step 3: Look up the rubric**: Before assigning severity or priority, read
+`reference.md` in this skill's directory for the exact severity scale,
+priority matrix, and output template. Do not invent your own labels or
+SLA hours; they are specific to this team's process.
+
+**Step 4: Assign severity and priority**: Map the bug to one severity and
+one priority from reference.md, using the matrix there.
+
+**Step 5: Next actions**: List 2-4 concrete follow-ups (who should look,
+what to verify, whether a hotfix is warranted) consistent with the
+priority's SLA from reference.md.
+
+## Output
+
+Fill the triage template from reference.md. Every field must use labels
+and numbers from that file — do not substitute common industry defaults.
+"""
 
 
 # ════════════════════════════════════════════════════════════════════════
@@ -84,7 +117,53 @@ def build_skill_md() -> str:
 
 def build_reference_md() -> str:
     """TODO 2: return the content of your skill's reference.md."""
-    raise NotImplementedError("TODO 2: see the comment block above")
+    return """# Bug Triage Rubric (Team Atlas)
+
+Use only these labels and numbers. Do not substitute P0/P1 industry defaults
+or generic "critical/major/minor" wording.
+
+## Severity scale
+
+| Code | Name          | Meaning |
+|------|---------------|---------|
+| S1   | Showstopper   | Core path unusable; data loss or security exposure |
+| S2   | Major         | Important feature broken; workaround exists |
+| S3   | Minor         | Partial degradation; most users unaffected |
+| S4   | Polish        | Cosmetic, docs, or nice-to-have |
+
+## Priority matrix (severity × user impact)
+
+| Severity | Many users / production | Few users / staging | Internal only |
+|----------|-------------------------|---------------------|---------------|
+| S1       | PRI-NOW                 | PRI-DAY             | PRI-WEEK      |
+| S2       | PRI-DAY                 | PRI-WEEK            | PRI-BACKLOG   |
+| S3       | PRI-WEEK                | PRI-BACKLOG         | PRI-BACKLOG   |
+| S4       | PRI-BACKLOG             | PRI-BACKLOG         | PRI-BACKLOG   |
+
+## SLA by priority (response target)
+
+| Priority    | First engineer response | Hotfix allowed? |
+|-------------|-------------------------|------------------|
+| PRI-NOW     | within 30 minutes       | yes              |
+| PRI-DAY     | within 4 hours          | yes if S1        |
+| PRI-WEEK    | within 2 business days  | no               |
+| PRI-BACKLOG | next planning cycle     | no               |
+
+## Output template
+
+```
+## Triage
+- Summary:
+- Severity: (S1–S4 + name)
+- Priority: (PRI-*)
+- SLA: (copy hours from table above)
+- Hotfix: yes/no (per table)
+- Missing info:
+- Next actions:
+  1.
+  2.
+```
+"""
 
 
 # Write the skill to a scratch directory so it's discoverable through a
@@ -108,8 +187,14 @@ print(f"Skill files written to: {_skill_dir}")
 # closely enough that the agent activates it.
 # ════════════════════════════════════════════════════════════════════════
 
-SYSTEM_PROMPT = """TODO 3: replace this with your own system prompt."""
-USER_QUESTION = "TODO 3: replace this with a question that should trigger your skill."
+SYSTEM_PROMPT = """You are Mira, a calm on-call engineer who triages bugs for
+Team Atlas. Be precise, use the team's labels, and never invent severity or
+priority codes."""
+USER_QUESTION = (
+    "Please triage this bug: After yesterday's deploy, the checkout button on "
+    "production does nothing for every customer — carts are stuck and we are "
+    "losing orders. No workaround. Classify severity and priority."
+)
 
 agent = create_deep_agent(
     model=model,
