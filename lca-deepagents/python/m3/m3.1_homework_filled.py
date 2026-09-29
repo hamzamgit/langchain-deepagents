@@ -31,7 +31,7 @@ def build_turns() -> list[str]:
 # TODO 2 filled in
 MAX_INPUT_TOKENS = 3000
 
-model.profile = {**model.profile, "max_input_tokens": MAX_INPUT_TOKENS}
+model.profile = {**(model.profile or {}), "max_input_tokens": MAX_INPUT_TOKENS}
 
 agent = create_deep_agent(
     model=model,

@@ -77,7 +77,7 @@ def build_turns() -> list[str]:
 
 MAX_INPUT_TOKENS = None  # TODO 2: replace None with your chosen integer threshold
 
-model.profile = {**model.profile, "max_input_tokens": MAX_INPUT_TOKENS}
+model.profile = {**(model.profile or {}), "max_input_tokens": MAX_INPUT_TOKENS}
 
 agent = create_deep_agent(
     model=model,
