@@ -74,12 +74,34 @@ def memory_namespace(runtime):
 
 def build_seed_memory_a() -> str:
     """TODO 1: return CONTEXT_A's starting memory content."""
-    raise NotImplementedError("TODO 1: see the comment block above")
+    return """\
+# Reading List Notes
+
+## Currently reading
+- "The Midnight Library" by Matt Haig — on chapter 12, paperback from the
+  neighborhood bookstore.
+
+## Preferences
+- Prefers literary fiction and memoir; avoids horror.
+- Reading goal: 2 books per month, evenings only (never during work hours).
+- Favorite cafe for reading: Blue Bean on 4th Street.
+"""
 
 
 def build_seed_memory_b() -> str:
     """TODO 1: return CONTEXT_B's starting memory content."""
-    raise NotImplementedError("TODO 1: see the comment block above")
+    return """\
+# Reading List Notes (teammate)
+
+## Currently reading
+- "Project Hail Mary" by Andy Weir — audiobook on chapter 8, listened on
+  the commute.
+
+## Preferences
+- Prefers hard sci-fi and thrillers; avoids romance.
+- Reading goal: 1 audiobook per week during gym cardio.
+- Favorite spot: the quiet car on the morning train.
+"""
 
 
 store.put(namespace_from_context(CONTEXT_A), store_memory_path, create_file_data(build_seed_memory_a()))
@@ -111,9 +133,17 @@ agent = create_deep_agent(
 #   reflect B's own seed, not A's.
 # ════════════════════════════════════════════════════════════════════════
 
-RECALL_QUESTION = "TODO 2: replace with a question answerable from build_seed_memory_a() alone."
-REMEMBER_MESSAGE = "TODO 2: replace with a 'remember this' message introducing a new, distinctive fact under context A."
-LEAK_CHECK_QUESTION = "TODO 2: replace with the SAME question as RECALL_QUESTION."
+RECALL_QUESTION = (
+    "What book am I currently reading, and what's my favorite cafe for reading?"
+)
+REMEMBER_MESSAGE = (
+    "Remember this: I just joined the Cedar Hollow book club that meets every "
+    "second Thursday at 7pm, and my club nickname is 'PageFox42'. Update your "
+    "memory with that."
+)
+LEAK_CHECK_QUESTION = (
+    "What book am I currently reading, and what's my favorite cafe for reading?"
+)
 
 # 1. Context A recalls from its own seed.
 result_a1 = agent.invoke({"messages": [{"role": "user", "content": RECALL_QUESTION}]}, context=CONTEXT_A)
