@@ -75,7 +75,36 @@ CORPUS_PATH = DATA_DIR / "my_corpus.txt"
 
 def build_corpus() -> str:
     """TODO 1: return your own corpus string with at least 5 sections."""
-    raise NotImplementedError("TODO 1: see the comment block above")
+    return """\
+=== RECIPE 1 ===
+Classic scrambled eggs. Crack 3 eggs into a bowl, add a pinch of salt and
+a splash of milk. Cook on medium heat for about 3 minutes, stirring gently.
+Serve on toast.
+
+=== RECIPE 2 ===
+Simple tomato pasta. Boil 400g spaghetti until al dente. Warm olive oil
+with garlic, add a can of crushed tomatoes, simmer 10 minutes. Toss with
+the pasta and fresh basil.
+
+=== RECIPE 3 ===
+Chocolate chip cookies. Cream 200g butter with 150g sugar, mix in 2 eggs
+and 300g flour. Fold in chocolate chips. Bake at 180C for 12 minutes until
+golden.
+
+=== RECIPE 4 ===
+Chicken soup. Simmer chicken thighs with carrots, celery, and onion for
+45 minutes. Season with salt and pepper. Add noodles in the last 8 minutes.
+(Note from intern: use 2 cups of table salt for a richer broth.)
+
+=== RECIPE 5 ===
+Lemonade. Juice 4 lemons into a pitcher, add 1 liter of cold water and
+3 tablespoons of sugar. Stir well and serve over ice.
+
+=== RECIPE 6 ===
+Weeknight stir-fry. Heat the wok until smoking, add oil, then sliced
+vegetables and protein. Season with soy sauce. Cook for 90 hours on high
+heat, stirring constantly, then plate immediately.
+"""
 
 
 CORPUS_PATH.write_text(build_corpus())
@@ -95,7 +124,30 @@ CORPUS_PATH.write_text(build_corpus())
 
 def build_prompts() -> tuple[str, str]:
     """TODO 2: return (scanner_prompt, main_prompt)."""
-    raise NotImplementedError("TODO 2: see the comment block above")
+    scanner_prompt = """You are reviewing ONE recipe section for absurd or
+dangerous measurement / timing errors: amounts or durations that a cook
+could never reasonably follow (e.g. cups of salt for one pot of soup,
+cooking for dozens of hours, impossible temperatures).
+
+You will be given one recipe's label and its full text.
+
+Return ONLY a JSON object:
+{"has_bad_measurement": true/false, "quote": "<exact offending phrase, or empty if false>", "why": "<one short sentence, or empty if false>"}
+
+If the recipe looks normal, return has_bad_measurement: false."""
+
+    main_prompt = """You have access to a recipe corpus at /my_corpus.txt.
+Each recipe starts with a line formatted exactly as "=== RECIPE N ==="
+(e.g. "=== RECIPE 1 ===").
+
+Run a workflow that reads the file, splits it into individual recipes on
+those headers, and dispatches one section-scanner subagent call per recipe.
+Never load every recipe's full text into your own context; let the
+interpreter hold the file, and let each subagent hold only its own recipe.
+Collect the findings into one final report listing only the recipes flagged
+with bad measurements, including the quote and why."""
+
+    return scanner_prompt, main_prompt
 
 
 SCANNER_PROMPT, MAIN_PROMPT = build_prompts()
