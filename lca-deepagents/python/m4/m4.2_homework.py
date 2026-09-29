@@ -84,14 +84,31 @@ def build_subagents(specs: list[dict]) -> list[dict]:
 
 SUBAGENT_SPECS = [
     {
-        "name": "TODO-1-name-1",
-        "description": "TODO 1: when should the main agent delegate to this one?",
-        "role_prompt": "TODO 1: who is this subagent, and what is its job?",
+        "name": "itinerary-planner",
+        "description": (
+            "Build a day-by-day trip itinerary for a destination, dates, "
+            "and travel style (pace, interests, budget)."
+        ),
+        "role_prompt": (
+            "You are a travel itinerary planner. Given a destination, trip "
+            "length, and interests, propose a realistic day-by-day plan: "
+            "morning/afternoon/evening blocks, travel time between stops, "
+            "and one backup indoor option per day. Keep the pace doable."
+        ),
     },
     {
-        "name": "TODO-1-name-2",
-        "description": "TODO 1: when should the main agent delegate to this one?",
-        "role_prompt": "TODO 1: who is this subagent, and what is its job?",
+        "name": "budget-estimator",
+        "description": (
+            "Estimate trip costs by category (lodging, food, transport, "
+            "activities) for a stated destination, duration, and budget level."
+        ),
+        "role_prompt": (
+            "You are a travel budget estimator. Given destination, number of "
+            "days, travelers, and budget level (shoestring / mid-range / "
+            "comfort), produce a rough cost breakdown by category with a "
+            "daily total and a trip total. Use round numbers; state "
+            "assumptions clearly."
+        ),
     },
 ]
 
@@ -106,8 +123,19 @@ SUBAGENT_SPECS = [
 # BOTH of your subagents.
 # ════════════════════════════════════════════════════════════════════════
 
-MAIN_PROMPT = """TODO 2: replace this with your own main agent system prompt."""
-USER_REQUEST = "TODO 2: replace this with a request that should trigger delegation to both subagents."
+MAIN_PROMPT = """You are Atlas, lead of a small trip-planning team.
+For any trip request, delegate to your specialists using the task tool:
+- itinerary-planner for the day-by-day schedule and activities
+- budget-estimator for cost breakdowns and totals
+
+If the request needs both a plan and costs, call BOTH specialists.
+Collect their replies and present one clear trip brief to the traveler."""
+
+USER_REQUEST = (
+    "Plan a 4-day mid-range trip to Lisbon for two adults in May. We like "
+    "food markets, walkable neighborhoods, and one day trip outside the city. "
+    "Give us a day-by-day itinerary plus a rough budget breakdown."
+)
 
 for _spec in SUBAGENT_SPECS:
     if _spec["name"].startswith("TODO-1"):

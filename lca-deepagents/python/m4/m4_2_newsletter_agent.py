@@ -20,7 +20,7 @@ from deepagents import FilesystemPermission, create_deep_agent
 from langchain_core.tools import tool
 from tavily import TavilyClient
 
-from models import model, strong_model
+from models import model
 
 # The distributor's top genres — known up front, no database needed.
 TOP_GENRES = ["Rock", "Latin", "Metal", "Alternative & Punk"]
@@ -150,7 +150,7 @@ editor_permissions = [
 ]
 
 agent = create_deep_agent(
-    model=strong_model,
+    model=model,
     tools=[markdown_to_html],
     system_prompt=EDITOR_PROMPT,
     subagents=[genre_researcher],
