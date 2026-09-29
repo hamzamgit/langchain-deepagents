@@ -1,17 +1,10 @@
 import asyncio
 import sqlite3
 import json
-import os
 from pathlib import Path
 from typing import List, Tuple
 import numpy as np
-from dotenv import load_dotenv
-from openai import AsyncOpenAI
-
-load_dotenv()
-
-# Initialize OpenAI client
-client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+from llm_client import client, CHAT_MODEL, EMBEDDING_MODEL
 
 # Configuration
 thread_id = "default"
@@ -166,7 +159,7 @@ async def load_knowledge_base(kb_dir: str = "./knowledge_base") -> None:
     embeddings = []
     for chunk_name, content in chunks:
         response = await client.embeddings.create(
-            model="text-embedding-3-small",
+            model=EMBEDDING_MODEL,
             input=content
         )
         embeddings.append(response.data[0].embedding)
@@ -181,7 +174,7 @@ async def search_knowledge_base(query: str, top_k: int = 2) -> str:
 
     # Generate embedding for query
     response = await client.embeddings.create(
-        model="text-embedding-3-small",
+        model=EMBEDDING_MODEL,
         input=query
     )
     query_embedding = response.data[0].embedding
@@ -260,7 +253,7 @@ async def chat(question: str) -> str:
 
     # First API call with tools
     response = await client.chat.completions.create(
-        model="gpt-5-nano",
+        model=CHAT_MODEL,
         messages=messages,
         tools=tools,
         tool_choice="auto"
@@ -314,7 +307,7 @@ async def chat(question: str) -> str:
 
         # Make next API call with tool results
         response = await client.chat.completions.create(
-            model="gpt-5-nano",
+            model=CHAT_MODEL,
             messages=messages,
             tools=tools,
             tool_choice="auto"
