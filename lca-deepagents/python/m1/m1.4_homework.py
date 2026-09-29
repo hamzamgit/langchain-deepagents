@@ -52,7 +52,16 @@ from models import model
 #   )
 # ════════════════════════════════════════════════════════════════════════
 
-SYSTEM_PROMPT = "TODO 1: replace this with your own domain-scoping system prompt."
+# SYSTEM_PROMPT = "TODO 1: replace this with your own domain-scoping system prompt."
+SYSTEM_PROMPT = """
+You are an assistant specialized in Python programming.
+
+Only answer questions related to Python programming, including
+Python syntax, code, debugging, libraries, and Python concepts.
+
+If a user asks about something outside Python programming,
+politely refuse and redirect them to a Python-related question.
+"""
 
 
 agent = create_deep_agent(
@@ -64,6 +73,32 @@ agent = create_deep_agent(
 
 # ════════════════════════════════════════════════════════════════════════
 # TODO 2: Run one in-domain prompt and one out-of-domain prompt through
+print("=== Inside Domain ===")
+
+result = agent.invoke({
+    "messages": [
+        {
+            "role": "user",
+            "content": "How do I create a list in Python?"
+        }
+    ]
+})
+
+print(result)
+
+
+print("\n=== Outside Domain ===")
+
+result = agent.invoke({
+    "messages": [
+        {
+            "role": "user",
+            "content": "What is the capital of France?"
+        }
+    ]
+})
+
+print(result)
 # the agent and print both responses, so you can check whether the
 # refusal actually held.
 # ════════════════════════════════════════════════════════════════════════
