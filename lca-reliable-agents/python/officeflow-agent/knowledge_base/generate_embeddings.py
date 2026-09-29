@@ -1,14 +1,11 @@
 """Pre-generate embeddings for the knowledge base to speed up agent startup."""
 import asyncio
 import json
-import os
+import sys
 from pathlib import Path
-from openai import AsyncOpenAI
-from dotenv import load_dotenv
 
-load_dotenv()
-
-client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from llm_client import client, EMBEDDING_MODEL
 
 DOCS_DIR = "./documents"
 EMBEDDINGS_DIR = "./embeddings"
@@ -31,7 +28,7 @@ async def generate_embeddings():
     embeddings = []
     for filename, content in docs:
         response = await client.embeddings.create(
-            model="text-embedding-3-small",
+            model=EMBEDDING_MODEL,
             input=content
         )
         embeddings.append(response.data[0].embedding)
