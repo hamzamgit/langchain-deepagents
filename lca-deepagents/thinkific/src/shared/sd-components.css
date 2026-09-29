@@ -1,0 +1,456 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=IBM+Plex+Mono:wght@300;400;500;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+.lesson {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 60px 28px 120px;
+}
+
+p { margin-bottom: 18px; }
+
+/* Custom callout divs (`<div style="background:...">`) wrap a single <p>;
+   its own margin-bottom stacks with the div's padding and reads as a
+   trailing blank line inside the box. */
+div[style*="background:"] > p:last-child { margin-bottom: 0; }
+
+.callout {
+  border-left: 3px solid #006DDD;
+  background: #E5F4FF;
+  padding: 14px 20px;
+  border-radius: 0 6px 6px 0;
+  margin: 28px 0;
+  font-size: 15.5px;
+  color: #030710;
+}
+.callout p:first-child { margin-top: 0; }
+.callout p:last-child { margin-bottom: 0; }
+
+mark.hl {
+  background: #FFF3B0;
+  color: inherit;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #CCE9FF;
+  margin: 40px 0;
+}
+
+/* ── Sequence Diagram Component ── */
+.sd-wrap {
+  margin: 40px 0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(3,7,16,0.08), 0 12px 40px rgba(3,7,16,0.16);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.sd-stage {
+  background: #030710;
+  cursor: pointer;
+  outline: none;
+}
+
+.sd-stage svg { width: 100%; height: auto; display: block; }
+
+/* Step states */
+.step { transition: opacity 0.3s ease; }
+.step-hidden  { opacity: 0; pointer-events: none; }
+.step-past    { opacity: 1; }
+.step-current { opacity: 1; }
+.step-dim     { opacity: 0.12; pointer-events: none; }
+
+/* Sequence diagram element colors */
+.al  { stroke: #40668D; fill: none; }
+.at  { fill: #40668D; }
+.ab  { fill: #161F34; stroke: #2F4B68; }
+.abt { fill: #40668D; }
+
+.step-past .al  { stroke: #B2DEFF; }
+.step-past .at  { fill: #B2DEFF; }
+.step-past .ab  { fill: #161F34; stroke: #40668D; }
+.step-past .abt { fill: #B2DEFF; }
+
+.step-current .al  { stroke: #7FC8FF; }
+.step-current .at  { fill: #CCE9FF; }
+.step-current .ab  { fill: #0D1322; stroke: #7FC8FF; }
+.step-current .abt { fill: #CCE9FF; }
+
+/* Architecture diagram element colors (light background) */
+.aa  { stroke: #40668D; fill: none; }
+.aat { fill: #40668D; }
+.aab { fill: #161F34; stroke: #2F4B68; }
+.aac { fill: #B2DEFF; }
+.aak { fill: #7FC8FF; }
+
+.step-current .aa  { stroke: #006DDD; }
+.step-current .aat { fill: #030710; }
+.step-current .aab { fill: #0D1322; stroke: #006DDD; }
+.step-current .aac { fill: #E5F4FF; }
+.step-current .aak { fill: #7FC8FF; }
+
+.step-past .aa  { stroke: #40668D; }
+.step-past .aat { fill: #40668D; }
+.step-past .aab { fill: #161F34; stroke: #40668D; }
+.step-past .aac { fill: #99D3FF; }
+.step-past .aak { fill: #7FC8FF; }
+
+/* Caption bar */
+.sd-bar {
+  background: #F2FAFF;
+  border-top: 1px solid #CCE9FF;
+  padding: 14px 18px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: start;
+}
+
+.sd-caption {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #030710;
+  min-height: 3em;
+  white-space: pre-line;
+}
+
+.sd-caption strong {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: #40668D;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+
+.sd-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.sd-btn {
+  width: 32px; height: 32px;
+  border-radius: 6px;
+  border: 1.5px solid #CCE9FF;
+  background: #F2FAFF;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: #030710;
+  font-size: 13px;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.sd-btn:hover:not(:disabled) {
+  background: #006DDD;
+  border-color: #006DDD;
+  color: #F2FAFF;
+}
+
+.sd-btn:disabled { opacity: 0.25; cursor: default; }
+
+.sd-dots {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  padding: 8px 18px 13px;
+  background: #F2FAFF;
+  border-top: 1px solid #E5F4FF;
+  flex-wrap: wrap;
+}
+
+.sd-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #CCE9FF;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.sd-dot.active { background: #006DDD; transform: scale(1.5); }
+
+.mobile-note {
+  display: none;
+  font-size: 12px;
+  color: #40668D;
+  text-align: center;
+  padding: 8px;
+  background: #F2FAFF;
+  border-top: 1px solid #E5F4FF;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+@media (max-width: 600px) { .mobile-note { display: block; } }
+
+/* ── Slideshow Component ── */
+.ss-stage { background: #fff; line-height: 0; }
+.ss-img   { width: 100%; height: auto; display: block; }
+.ss-cap p { margin: 0 0 8px; }
+.ss-cap p:last-child { margin-bottom: 0; }
+
+/* ── Details / expandable blocks ── */
+details {
+  border: 1px solid #CCE9FF;
+  border-radius: 6px;
+  background: #F2FAFF;
+  margin: 20px 0;
+}
+details > summary {
+  padding: 10px 16px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #006DDD;
+  list-style: none;
+  border-radius: 6px;
+}
+details > summary::-webkit-details-marker { display: none; }
+details > summary::before {
+  content: '▶';
+  display: inline-block;
+  margin-right: 7px;
+  font-size: 0.65em;
+  transition: transform 0.2s;
+  vertical-align: 1px;
+}
+details[open] > summary::before { transform: rotate(90deg); }
+details[open] > summary {
+  border-bottom: 1px solid #CCE9FF;
+  border-radius: 6px 6px 0 0;
+}
+details > *:not(summary) { padding: 0 16px; }
+details > summary + * { padding-top: 8px; }
+
+/* ── Nested note: indented, more compact dropdown under a list item ── */
+details.nested-note {
+  width: calc(100% - 32px);
+  margin: 12px 0 20px 32px;
+}
+details.nested-note > summary {
+  padding: 7px 14px;
+}
+
+/* ── MCQ: hide ✅ emoji in answer header (no text presentation in Unicode) ── */
+.mcq-answer-header { font-size: 0 !important; }
+.mcq-answer-header strong { font-size: 1.05rem; }
+
+/* ── Video walk-through blocks (pink) ── */
+details.video-walkthrough {
+  border-color: #F4ABCD;
+  background: #FFF0F7;
+}
+details.video-walkthrough > summary { color: #BE185D; }
+details[open].video-walkthrough > summary { border-bottom-color: #F4ABCD; }
+
+/* ── Tip box: remove bottom margin on last paragraph ── */
+.tip p:last-child { margin-bottom: 0; }
+
+/* ── Case study callout: green box with LangChain logo, for real-world customer examples ── */
+.case-study {
+  margin: 1.5rem 0;
+  padding: 1.25rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #86EFAC;
+  background-color: #ECFDF5;
+  color: #065F46;
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+}
+.case-study img {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  object-fit: contain;
+}
+.case-study p { margin: 0 0 0.5rem; }
+.case-study p:last-child { margin-bottom: 0; }
+.case-study strong { color: #065F46; }
+.case-study code { background-color: #D1FAE5; color: #065F46; }
+.case-study a {
+  color: #047857;
+  font-weight: 600;
+  text-decoration: underline;
+}
+.case-study a:hover { color: #065F46; }
+
+/* ── Demo tip: blue box with a hand-pointer icon, for "try it yourself" prompts next to a live embedded demo ── */
+.demo-tip {
+  margin: 1.5rem 0;
+  padding: 1.25rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #9adbb0;
+  background-color: #e6f7ec;
+  color: #1e5e3a;
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+.demo-tip svg {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  margin-top: 0px;
+  color: #1e5e3a;
+  transform: scaleY(1.15);
+}
+.demo-tip > p { margin: 0; }
+.demo-tip > div p { margin: 0 0 0.5rem; }
+.demo-tip > div p:last-child { margin-bottom: 0; }
+.demo-tip ul, .demo-tip ol { margin: 0.5rem 0; padding-left: 2.25rem; }
+.demo-tip li:last-child { margin-bottom: 0; }
+.demo-tip strong { color: #1e5e3a; }
+.demo-tip code { background-color: #cdf0da; color: #1e5e3a; }
+
+/* ── Code tabs (block-switch: language choice scoped to one code block) ── */
+.code-tabs {
+  position: relative;
+  margin: 1rem 0 1.5rem;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #030710;
+}
+
+/* Same top offset and height as .copy-button-inline so both sit inline,
+   left and right, in the reserved top band of the code block (see pre { padding-top }). */
+.code-tab-list {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.9rem;
+  height: 28px;
+  z-index: 2;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.code-tab {
+  font: 500 12px 'IBM Plex Mono', monospace;
+  padding: 0 0 4px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: #B8D4FF;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+}
+
+.code-tab:hover { color: #F2FAFF; }
+
+.code-tab.active {
+  color: #F2FAFF;
+  border-bottom-color: #7FC8FF;
+}
+
+.code-tab-panel { display: none; }
+.code-tab-panel.active { display: block; }
+.code-tab-panel pre {
+  margin: 0;
+  border-radius: 8px;
+}
+
+/* ── Code-block copy button: always-visible icon, never overlapping the code ── */
+/* Extra top padding reserves a band for the button so the first line stays clear. */
+pre { padding-top: 2.85rem; }
+pre.no-copy { padding-top: 0.75rem; }
+
+/* Self-contained clipboard icon (inline SVG data-URI) so the button shows even
+   when the pipeline's symbols/copy.png isn't copied next to the page. */
+pre .copy-button-inline {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23cfe8ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='9' width='13' height='13' rx='2'/%3E%3Cpath d='M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'/%3E%3C/svg%3E");
+  background-position: center;
+  background-size: 16px;
+  background-repeat: no-repeat;
+  background-color: rgba(127, 200, 255, 0.14);
+  filter: none;
+  opacity: 0.85;
+  border-radius: 6px;
+}
+
+pre .copy-button-inline:hover {
+  filter: none;
+  opacity: 1;
+  background-color: rgba(127, 200, 255, 0.30);
+}
+
+/* ── Page-level language switch (page-switch: scope is the whole lesson) ──
+   Fixed full-width bar pinned to the top of the viewport, auto-hides on
+   scroll-down and reappears on scroll-up — matches the reliable-agents
+   LanguageSelector look exactly (colors, shape, layout included). Also acts
+   as the single global toggle — see sd-components.js — so it stays in sync
+   with any .code-tabs (block-switch) blocks on the same page. A JS-measured
+   spacer (inserted right after this element) reserves its height so content
+   doesn't jump when it goes fixed. */
+.page-lang-switch {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 1rem 0;
+  background: #ffffff;
+  border-bottom: 2px solid #e5e7eb;
+  border-radius: 0;
+  box-shadow: none;
+  transition: transform 0.3s ease-in-out;
+}
+
+.page-lang-switch.pls-hidden {
+  transform: translateY(-100%);
+}
+
+.page-lang-btn {
+  padding: 0.5rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  background: #fafafa;
+  color: #6b7280;
+  font: 600 0.9375rem/1.2 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: normal;
+  text-transform: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.page-lang-btn:hover { color: #1f2937; }
+
+.page-lang-btn.active {
+  background: #d1d5db;
+  color: #1f2937;
+}
+
+/* ── Back to Top button ── */
+.back-to-top-btn {
+  display: block;
+  width: 100%;
+  margin: 52px 0 8px;
+  padding: 20px 24px;
+  background: #006DDD;
+  color: #F2FAFF;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: 'IBM Plex Mono', monospace;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: background 0.15s, transform 0.1s;
+  text-align: center;
+}
+.back-to-top-btn:hover {
+  background: #0059b3;
+  transform: translateY(-2px);
+}
+.back-to-top-btn:active { transform: translateY(0); }
