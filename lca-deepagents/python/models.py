@@ -34,18 +34,28 @@ load_dotenv(dotenv_path=Path(__file__).resolve().parent / ".env", override=True)
 
 from langchain.chat_models import init_chat_model
 
+from langchain_openai import ChatOpenAI
+import os
+
+model = ChatOpenAI(
+    model="openai/gpt-5-nano",
+    api_key=os.environ["OPENROUTER_API_KEY"],
+    base_url="https://openrouter.ai/api/v1",
+)
+# Same model used when a lesson asks for strong_model (orchestration / harder steps).
+strong_model = model
 # ═══ Default Models ══════════════════════════════════════════════════════════
 # Workshop default: Anthropic claude-haiku-4-5, fast and cost-effective.
 # Requires ANTHROPIC_API_KEY in .env
-model = init_chat_model("anthropic:claude-haiku-4-5", timeout=60, max_retries=2)
+# model = init_chat_model("anthropic:claude-haiku-4-5", timeout=60, max_retries=2)
 
 #A more capable model for steps that need stronger reasoning
-strong_model = init_chat_model("anthropic:claude-sonnet-4-6", timeout=120, max_retries=2)
+# strong_model = init_chat_model("anthropic:claude-sonnet-4-6", timeout=120, max_retries=2)
 
 # ═══ Alternative Models (comment out default above, uncomment one below) ═════
 # model = init_chat_model("anthropic:claude-sonnet-4-6")
 # model = init_chat_model("openai:gpt-4.1-mini")
-# model = init_chat_model("openai:gpt-4.1")
+# model = init_chat_model("openai:openai/gpt-5-nano")
 # strong_model = init_chat_model("openai:gpt-4.1")
 
 # ═══ Open-Source / Alternative Hosted Models ══════════════════════════════════
