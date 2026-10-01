@@ -18,6 +18,8 @@ _SENSITIVE_KEYS = frozenset(
         "authorization",
         "llm_api_key",
         "langsmith_api_key",
+        "new_email",
+        "email",
     }
 )
 

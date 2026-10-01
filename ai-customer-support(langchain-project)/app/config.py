@@ -39,6 +39,9 @@ class Settings(BaseSettings):
     langsmith_project: str = "ai-customer-support"
     langchain_tracing_v2: bool = False
 
+    # Bumped when agent behavior/prompts change — shows up on every LangSmith trace
+    agent_version: str = Field(default="v1", description="Support agent version tag for traces/evals")
+
     checkpoint_db_path: str = "./data/checkpoints.db"
     knowledge_dir: str = "./knowledge"
 

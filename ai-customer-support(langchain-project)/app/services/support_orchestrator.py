@@ -10,11 +10,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.graph.workflow import get_compiled_graph
 from app.middleware.logging import log_agent_step
+from app.observability.tracing import (
+    RunCollector,
+    build_graph_config,
+    enrich_run_from_outcome,
+    thread_id_for,
+)
 from app.services import approval_service, billing_service, conversation_service, customer_service
-
-
-def thread_id_for(conversation_id: str) -> str:
-    return f"conv:{conversation_id}"
 
 
 async def process_customer_message(
@@ -26,7 +28,12 @@ async def process_customer_message(
 ) -> dict[str, Any]:
     """Run the support graph for a new customer message."""
     graph = await get_compiled_graph()
-    thread = {"configurable": {"thread_id": thread_id_for(conversation_id)}}
+    config = build_graph_config(
+        conversation_id=conversation_id,
+        customer_id=customer_id,
+        run_name="support_turn",
+        message=message,
+    )
 
     initial: dict[str, Any] = {
         "customer_id": customer_id,
@@ -36,7 +43,9 @@ async def process_customer_message(
         "errors": [],
     }
 
-    result = await graph.ainvoke(initial, config=thread)
+    with RunCollector() as collector:
+        result = await graph.ainvoke(initial, config=config)
+
     interrupted = bool(result.get("__interrupt__"))
 
     approval_id = result.get("approval_id")
@@ -73,7 +82,7 @@ async def process_customer_message(
             step="awaiting_approval",
             details={"approval_id": approval_id},
         )
-        return {
+        outcome = {
             "status": "awaiting_approval",
             "category": (result.get("intent") or {}).get("category"),
             "priority": result.get("priority"),
@@ -83,8 +92,20 @@ async def process_customer_message(
             "final_response": draft,
             "ticket_id": result.get("ticket_id"),
         }
+        enrich_run_from_outcome(
+            collector.run_id,
+            assigned_agent=outcome.get("assigned_agent"),
+            category=outcome.get("category"),
+            priority=outcome.get("priority"),
+            status=outcome["status"],
+            requires_human=True,
+            approval_id=approval_id,
+            ticket_id=outcome.get("ticket_id"),
+            errors=result.get("errors"),
+        )
+        return outcome
 
-    return {
+    outcome = {
         "status": "completed",
         "category": (result.get("intent") or {}).get("category"),
         "priority": result.get("priority"),
@@ -94,6 +115,18 @@ async def process_customer_message(
         "final_response": result.get("final_response"),
         "ticket_id": result.get("ticket_id"),
     }
+    enrich_run_from_outcome(
+        collector.run_id,
+        assigned_agent=outcome.get("assigned_agent"),
+        category=outcome.get("category"),
+        priority=outcome.get("priority"),
+        status=outcome["status"],
+        requires_human=False,
+        approval_id=outcome.get("approval_id"),
+        ticket_id=outcome.get("ticket_id"),
+        errors=result.get("errors"),
+    )
+    return outcome
 
 
 async def resume_after_approval(
@@ -122,15 +155,39 @@ async def resume_after_approval(
 
     graph = await get_compiled_graph()
     thread_id = approval.graph_thread_id or thread_id_for(approval.conversation_id)
-    thread = {"configurable": {"thread_id": thread_id}}
+    config = build_graph_config(
+        conversation_id=approval.conversation_id,
+        customer_id=approval.customer_id,
+        run_name="support_turn_resume",
+        extra_tags=["hitl_resume", "approved" if approved else "rejected"],
+        extra_metadata={
+            "approval_id": approval_id,
+            "approval_decision": "approved" if approved else "rejected",
+            "thread_id": thread_id,
+        },
+    )
+    # Keep checkpoint thread continuity
+    config["configurable"] = {"thread_id": thread_id}
 
-    snapshot = await graph.aget_state(thread)
+    snapshot = await graph.aget_state(config)
     if snapshot.next:
-        result = await graph.ainvoke(
-            Command(resume={"approved": approved, "reviewer_note": reviewer_note}),
-            config=thread,
-        )
+        with RunCollector() as collector:
+            result = await graph.ainvoke(
+                Command(resume={"approved": approved, "reviewer_note": reviewer_note}),
+                config=config,
+            )
         final = result.get("final_response")
+        enrich_run_from_outcome(
+            collector.run_id,
+            assigned_agent=result.get("assigned_agent"),
+            category=(result.get("intent") or {}).get("category"),
+            priority=result.get("priority"),
+            status="approved" if approved else "rejected",
+            requires_human=False,
+            approval_id=approval_id,
+            ticket_id=result.get("ticket_id"),
+            errors=result.get("errors"),
+        )
     else:
         final = None
         result = {}
