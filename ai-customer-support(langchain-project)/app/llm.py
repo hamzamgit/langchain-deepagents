@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import logging
 import os
 from functools import lru_cache
 
 from langchain_openai import ChatOpenAI
 
 from app.config import Settings, get_settings
+
+logger = logging.getLogger("support.llm")
 
 
 def configure_langsmith(settings: Settings | None = None) -> None:
@@ -18,9 +21,15 @@ def configure_langsmith(settings: Settings | None = None) -> None:
         os.environ["LANGCHAIN_TRACING_V2"] = "true"
         os.environ["LANGSMITH_API_KEY"] = settings.langsmith_api_key
         os.environ["LANGSMITH_PROJECT"] = settings.langsmith_project
+        logger.info(
+            "LangSmith tracing enabled project=%s agent_version=%s",
+            settings.langsmith_project,
+            settings.agent_version,
+        )
     else:
         os.environ.setdefault("LANGSMITH_TRACING", "false")
         os.environ.setdefault("LANGCHAIN_TRACING_V2", "false")
+        logger.info("LangSmith tracing disabled (set LANGSMITH_TRACING + LANGSMITH_API_KEY to enable)")
 
 
 @lru_cache
